@@ -1,19 +1,74 @@
 # 深入理解分布式唯一ID
 两个关键词: 分布式 唯一
 
-## ID生成时需要考虑的内容
-### ID长度带来的影响
-### ID数据类型带来的影响
-### ID是否有序带来的影响
-- 连续递增
-- 单调递增
-- 趋势递增
-### 安全性考虑
-
 ## 分布式场景下对ID的要求
 ### 全局唯一
+- 数据错误
+- 回滚代价
+- 性能影响
 ### 高并发
 ### 高可用
+
+## ID生成时需要考虑的内容
+### ID长度带来的影响 [关键: 考虑缓冲区的索引场景空间有限]
+在MySQL中，主键的长度会影响到查询性能。这是因为InnoDB存储引擎使用B+树数据结构来存储数据库表中的数据，表的主键存储在B+树的叶子节点上，叶子节点上还存储着主键所关联的行记录数据¹。
+
+如果主键过长，那么每个索引都需要存储这个值，这将导致以下几个问题²⁴⁵：
+1. **内存使用**：在数据量大，内存珍贵的情况下，MySQL有限的缓冲区，存储的索引与数据会减少。
+2. **磁盘IO**：由于缓冲区中存储的索引和数据减少，磁盘IO的概率会增加。
+3. **磁盘空间**：索引占用的磁盘空间也会增加。
+
+因此，为了提高查询性能和节省存储空间，建议使用较短的主键。
+(1) 为什么MySQL设计主键时key不能过长？ - 简书. https://www.jianshu.com/p/31bfd4ac3e61.
+(2) 数据库，主键为何不宜太长？ - 知乎. https://zhuanlan.zhihu.com/p/336082481.
+(3) 数据库，主键为何不宜太长长长长长长长长？ - 简书. https://www.jianshu.com/p/9c203377737e.
+(4) 数据库，主键为何不宜太长长长长长长长长？-CSDN博客. https://blog.csdn.net/shenjian58/article/details/101442706.
+(5) mysql的主键超过最大值会发生什么？ - zhengbiyu - 博客园. https://www.cnblogs.com/zhengbiyu/p/17301057.html.
+
+### ID数据类型带来的影响
+在MySQL中，主键的选择需要根据具体的业务需求和系统性能要求来综合考虑。数值型主键和字符型主键各有其优点和适用的场景¹²。
+
+**数值型主键**（如INT、BIGINT）的优点包括¹：
+1. **空间效率高**：数值型占用的存储空间相对较小，比字符型更节省空间。
+2. **查询效率高**：数值型主键在索引和排序操作上更高效，因为整数比字符型更容易进行比较和排序。
+3. **简单易用**：数值型主键可以通过自增长序列来生成，简化了数据的插入和维护过程。
+
+**字符型主键**（如CHAR、VARCHAR）的优点包括¹：
+1. **可读性强**：字符类型主键能够直观地反映其所代表的实际含义，方便开发人员和用户理解。
+2. **灵活性高**：字符类型主键可以包含更多的信息，如有时需要使用复合键来标识数据，字符类型可以较好地满足这个需求。
+3. **数据复用性高**：字符类型主键可以尽可能利用数据库已有的字符数据，避免额外冗余存储。
+【2/3两点由于引入了有语义的内容，在一定程度下需要考虑安全性问题。另外也要根据场景使用确认不会出现变更的语义信息来组成字符型主键】
+
+以下是一些比较重要的考虑因素¹：
+- **存储空间**：数值型主键相对较小，节省存储空间；而字符型主键根据具体长度而定，可能占据更多的存储空间。
+- **查询效率**：数值型主键在索引和排序操作上更高效；而字符型主键在特定场景下可能效率更高，如需要根据字符串进行模糊搜索或排序。
+- **可读性**：字符型主键更直观易懂，方便开发人员和用户理解；而数值型主键则需要额外的映射关系才能理解其含义。
+- **数据复用性**：字符型主键可以利用已有字符数据来标识数据，避免冗余存储；而数值型主键则需要额外的关联表来实现类似功能。
+
+(1) MySQL主键使用数值型和字符型的区别-CSDN博客. https://blog.csdn.net/xhaimail/article/details/132732033.
+(2) 数据库的主键应该选择什么数据类型比较好？ - 知乎. https://www.zhihu.com/question/30888980.
+(3) MySQL：VARCHAR 可以作为主键吗？ - 极客教程. https://geek-docs.com/mysql/mysql-ask-answer/425_mysql_can_i_use_varchar_as_the_primary_key.html.
+(4) MySQL: VARCHAR作为主键使用吗？|极客笔记. https://deepinout.com/mysql/mysql-questions/425_mysql_can_i_use_varchar_as_the_primary_key.html.
+
+### ID是否有序带来的影响
+递增ID带来的影响：
+- 连续递增
+- 单调递增
+- 趋势递增 (描述一组数据整体上的增长趋势，而不是严格的每一项都比前一项大。在这种情况下，可能存在一些局部的下降，但是整体的趋势是向上的)
+
+
+(1) 增区间和增函数的区别？ 单调递增区间和增区间的区别？ - 百度知道. https://zhidao.baidu.com/question/460078269.html.
+(2) 5种全局ID生成方式、优缺点及改进方案 - 知乎. https://zhuanlan.zhihu.com/p/397680307.
+(3) 系统架构：分布式ID那点事儿 - 知乎. https://zhuanlan.zhihu.com/p/107592567.
+(4) 分布式ID_复杂分布式系统中,往往需要对大量的数据和消-CSDN博客. https://blog.csdn.net/baidu_38900596/article/details/114404037.
+(5) 忘掉 Snowflake，感受一下性能高出 587 倍的全局唯一 ID 生成算法 - 知乎. https://zhuanlan.zhihu.com/p/154480290.
+(6) http://code.flickr.com/blog/2010/02/08/ticket-servers-distributed-unique-primary-keys-on-the-cheap/.
+(7) https://mp.weixin.qq.com/s/kZAnYz_Jj4aBrtsk8Q9w_A.
+(8) https://www.jianshu.com/p/fac342e41fb6.
+(9) http://instagram-engineering.tumblr.com/post/10853187575/sharding-ids-at-instagram.
+(10) https://docs.mongodb.com/manual/reference/method/ObjectId/.
+(11) https://github.com/baidu/uid-generator.
+### 安全性考虑
 
 ## 最常见的ID生成方式
 ### UUID
@@ -48,3 +103,4 @@ All indexes other than the clustered index are known as secondary indexes. In In
 
 参考 
 https://tech.meituan.com/2017/04/21/mt-leaf.html
+https://zhuanlan.zhihu.com/p/397680307
