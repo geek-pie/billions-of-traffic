@@ -84,7 +84,6 @@ All indexes other than the clustered index are known as secondary indexes. In In
   ② 对MySQL索引不利：如果作为数据库主键，在InnoDB引擎下，UUID的无序性可能会引起数据位置频繁变动，严重影响性能。
 ### 数据库自增ID
 
-## 分布式场景的初代ID方案
 ### hash自增（步长自增）
 ### 分段自增
 ### redis自增
