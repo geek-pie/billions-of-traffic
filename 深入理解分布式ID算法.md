@@ -1,14 +1,6 @@
 # 深入理解分布式唯一ID
 两个关键词: 分布式 唯一
 
-## 分布式场景下对ID的要求
-### 全局唯一
-- 数据错误
-- 回滚代价
-- 性能影响
-### 高并发
-### 高可用
-
 ## ID生成时需要考虑的内容
 ### ID长度带来的影响 [关键: 考虑缓冲区的索引场景空间有限]
 在MySQL中，主键的长度会影响到查询性能。这是因为InnoDB存储引擎使用B+树数据结构来存储数据库表中的数据，表的主键存储在B+树的叶子节点上，叶子节点上还存储着主键所关联的行记录数据¹。
@@ -20,9 +12,13 @@
 
 因此，为了提高查询性能和节省存储空间，建议使用较短的主键。
 > (1) 为什么MySQL设计主键时key不能过长？ - 简书. https://www.jianshu.com/p/31bfd4ac3e61.
+>
 > (2) 数据库，主键为何不宜太长？ - 知乎. https://zhuanlan.zhihu.com/p/336082481.
+>
 > (3) 数据库，主键为何不宜太长长长长长长长长？ - 简书. https://www.jianshu.com/p/9c203377737e.
+>
 > (4) 数据库，主键为何不宜太长长长长长长长长？-CSDN博客. https://blog.csdn.net/shenjian58/article/details/101442706.
+>
 > (5) mysql的主键超过最大值会发生什么？ - zhengbiyu - 博客园. https://www.cnblogs.com/zhengbiyu/p/17301057.html.
 
 ### ID数据类型带来的影响
@@ -45,32 +41,64 @@
 - **可读性**：字符型主键更直观易懂，方便开发人员和用户理解；而数值型主键则需要额外的映射关系才能理解其含义。
 - **数据复用性**：字符型主键可以利用已有字符数据来标识数据，避免冗余存储；而数值型主键则需要额外的关联表来实现类似功能。
 
-(1) MySQL主键使用数值型和字符型的区别-CSDN博客. https://blog.csdn.net/xhaimail/article/details/132732033.
-(2) 数据库的主键应该选择什么数据类型比较好？ - 知乎. https://www.zhihu.com/question/30888980.
-(3) MySQL：VARCHAR 可以作为主键吗？ - 极客教程. https://geek-docs.com/mysql/mysql-ask-answer/425_mysql_can_i_use_varchar_as_the_primary_key.html.
-(4) MySQL: VARCHAR作为主键使用吗？|极客笔记. https://deepinout.com/mysql/mysql-questions/425_mysql_can_i_use_varchar_as_the_primary_key.html.
+> (1) MySQL主键使用数值型和字符型的区别-CSDN博客. https://blog.csdn.net/xhaimail/article/details/132732033.
+>
+> (2) 数据库的主键应该选择什么数据类型比较好？ - 知乎. https://www.zhihu.com/question/30888980.
+>
+> (3) MySQL：VARCHAR 可以作为主键吗？ - 极客教程. https://geek-docs.com/mysql/mysql-ask-answer/425_mysql_can_i_use_varchar_as_the_primary_key.html.
+>
+> (4) MySQL: VARCHAR作为主键使用吗？|极客笔记. https://deepinout.com/mysql/mysql-questions/425_mysql_can_i_use_varchar_as_the_primary_key.html.
 
 ### ID是否有序带来的影响
-递增ID带来的影响：
+在MySQL中，主键是否递增对数据库的性能和数据一致性有重要影响：
+
+1. **性能优化**：设计MySQL表时，我们一般会设置一个自增主键，从而让主键索引尽可能的保持递增的趋势，这样可以避免页分裂，让MySQL顺序写入，大大提高MySQL的性能。
+
+2. **数据一致性**：在MySQL5.7之前，这个递增值是直接保存在内存里面的，当服务器重启后，MySQL会读取表里面的最大主键id，然后将最大值+1作为下次递增的值。这种设计可能会导致主键不连续，从而影响数据的一致性。
+
+3. **并发事务处理**：为了提高事务的吞吐量，MySQL可以处理并发执行的多个事务，但是如果并发执行多个插入新记录的SQL语句，可能会导致主键的不连续。
+
+> (1) 面试官：MySQL主键为什么不是连续递增的？-mysql设置主键自增长 - 51CTO. https://www.51cto.com/article/>743188.html.
+>
+> (2) 面试官：MySQL主键为什么不是连续递增的？-CSDN博客. https://blog.csdn.net/qq_33312725/article/details/>128462658.
+>
+> (3) MySQL数据库——MySQL AUTO_INCREMENT：主键自增长 - CSDN博客. https://blog.csdn.net/Itmastergo/article/>details/130260568.
+>
+> (4) 为什么 MySQL 的自增主键不单调也不连续 - 知乎. https://zhuanlan.zhihu.com/p/202960807.
+>
+> (5) 为什么主键索引建议顺序递增？ - 知乎. https://www.zhihu.com/question/588206465.
+
+ID顺序递增类型和带来的影响：
 - 连续递增
 - 单调递增
 - 趋势递增 (描述一组数据整体上的增长趋势，而不是严格的每一项都比前一项大。在这种情况下，可能存在一些局部的下降，但是整体的趋势是向上的)
 
+结论：连续递增和单调递增在并发场景下难以保证。综合来看，想要通过主键顺序得到性能buff，做到趋势递增是一种折中选择
 
-(1) 增区间和增函数的区别？ 单调递增区间和增区间的区别？ - 百度知道. https://zhidao.baidu.com/question/460078269.html.
-(2) 5种全局ID生成方式、优缺点及改进方案 - 知乎. https://zhuanlan.zhihu.com/p/397680307.
-(3) 系统架构：分布式ID那点事儿 - 知乎. https://zhuanlan.zhihu.com/p/107592567.
-(4) 分布式ID_复杂分布式系统中,往往需要对大量的数据和消-CSDN博客. https://blog.csdn.net/baidu_38900596/article/details/114404037.
-(5) 忘掉 Snowflake，感受一下性能高出 587 倍的全局唯一 ID 生成算法 - 知乎. https://zhuanlan.zhihu.com/p/154480290.
-(6) http://code.flickr.com/blog/2010/02/08/ticket-servers-distributed-unique-primary-keys-on-the-cheap/.
-(7) https://mp.weixin.qq.com/s/kZAnYz_Jj4aBrtsk8Q9w_A.
-(8) https://www.jianshu.com/p/fac342e41fb6.
-(9) http://instagram-engineering.tumblr.com/post/10853187575/sharding-ids-at-instagram.
-(10) https://docs.mongodb.com/manual/reference/method/ObjectId/.
-(11) https://github.com/baidu/uid-generator.
+> (1) 增区间和增函数的区别？ 单调递增区间和增区间的区别？ - 百度知道. https://zhidao.baidu.com/question/460078269.html.
+> 
+> (2) 5种全局ID生成方式、优缺点及改进方案 - 知乎. https://zhuanlan.zhihu.com/p/397680307.
+> 
+> (3) 系统架构：分布式ID那点事儿 - 知乎. https://zhuanlan.zhihu.com/p/107592567.
+> 
+> (4) 分布式ID_复杂分布式系统中,往往需要对大量的数据和消-CSDN博客. https://blog.csdn.net/baidu_38900596/article/details/114404037.
+> 
+> (5) 忘掉 Snowflake，感受一下性能高出 587 倍的全局唯一 ID 生成算法 - 知乎. https://zhuanlan.zhihu.com/p/154480290.
+> 
+> (6) http://code.flickr.com/blog/2010/02/08/ticket-servers-distributed-unique-primary-keys-on-the-cheap/.
+> 
+> (7) https://mp.weixin.qq.com/s/kZAnYz_Jj4aBrtsk8Q9w_A.
+> 
+> (8) https://www.jianshu.com/p/fac342e41fb6.
+> 
+> (9) http://instagram-engineering.tumblr.com/post/10853187575/sharding-ids-at-instagram.
+> 
+> (10) https://docs.mongodb.com/manual/reference/method/ObjectId/.
+> 
+> (11) https://github.com/baidu/uid-generator.
 ### 安全性考虑
 
-## 最常见的ID生成方式
+## 常见的ID生成方式
 ### UUID
 UUID(Universally Unique Identifier)的标准型式包含32个16进制数字，以连字号分为五段，形式为8-4-4-4-12的36个字符，示例：550e8400-e29b-41d4-a716-446655440000，到目前为止业界一共有5种方式生成UUID，详情见IETF发布的UUID规范 A Universally Unique IDentifier (UUID) URN Namespace。
 #### 优点：
@@ -84,6 +112,22 @@ All indexes other than the clustered index are known as secondary indexes. In In
   ② 对MySQL索引不利：如果作为数据库主键，在InnoDB引擎下，UUID的无序性可能会引起数据位置频繁变动，严重影响性能。
 ### 数据库自增ID
 
+## 分布式场景下对ID的要求
+### 全局唯一
+- 数据错误
+- 回滚代价
+- 性能影响
+### 高并发
+### 高可用
+### 多数条件下要避免业务属性
+带有业务属性的id必然意味着局限在一定的业务场景之内，通用性差，而考虑到其高可用依赖的资源成本，复杂度以及维护工作量，为不同的业务场景设计不同的带有业务属性的id在多数条件下是难以接受的。
+
+## 普通的id演进为分布式的思考路径
+### 全局唯一 高性能 高可用
+关键点: 多实例，隔离标识，分布式锁，正确且高效分配
+其他手法: 搞副本，预分配
+
+## 分布式场景下的ID生成方式
 ### hash自增（步长自增）
 ### 分段自增
 ### redis自增
