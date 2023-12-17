@@ -19,11 +19,11 @@
 3. **磁盘空间**：索引占用的磁盘空间也会增加。
 
 因此，为了提高查询性能和节省存储空间，建议使用较短的主键。
-(1) 为什么MySQL设计主键时key不能过长？ - 简书. https://www.jianshu.com/p/31bfd4ac3e61.
-(2) 数据库，主键为何不宜太长？ - 知乎. https://zhuanlan.zhihu.com/p/336082481.
-(3) 数据库，主键为何不宜太长长长长长长长长？ - 简书. https://www.jianshu.com/p/9c203377737e.
-(4) 数据库，主键为何不宜太长长长长长长长长？-CSDN博客. https://blog.csdn.net/shenjian58/article/details/101442706.
-(5) mysql的主键超过最大值会发生什么？ - zhengbiyu - 博客园. https://www.cnblogs.com/zhengbiyu/p/17301057.html.
+> (1) 为什么MySQL设计主键时key不能过长？ - 简书. https://www.jianshu.com/p/31bfd4ac3e61.
+> (2) 数据库，主键为何不宜太长？ - 知乎. https://zhuanlan.zhihu.com/p/336082481.
+> (3) 数据库，主键为何不宜太长长长长长长长长？ - 简书. https://www.jianshu.com/p/9c203377737e.
+> (4) 数据库，主键为何不宜太长长长长长长长长？-CSDN博客. https://blog.csdn.net/shenjian58/article/details/101442706.
+> (5) mysql的主键超过最大值会发生什么？ - zhengbiyu - 博客园. https://www.cnblogs.com/zhengbiyu/p/17301057.html.
 
 ### ID数据类型带来的影响
 在MySQL中，主键的选择需要根据具体的业务需求和系统性能要求来综合考虑。数值型主键和字符型主键各有其优点和适用的场景¹²。
