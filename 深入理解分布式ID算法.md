@@ -138,8 +138,9 @@ All indexes other than the clustered index are known as secondary indexes. In In
   > 分布式算法
   > - 高性能分布式锁直接维护id
   >   - redis自增
-  > - 分布式算法维护单实例id
-  >   - 雪花算法
+  > - 分布式算法维护单实例id(雪花算法)
+  >   - zookeeper
+
 提高性能的思路:
 - 不同步落盘
 - 预分配
@@ -165,7 +166,13 @@ All indexes other than the clustered index are known as secondary indexes. In In
 - 考虑redis本身的性能上限
 - 考虑与redis间通信的时延
 
-## 雪花算法和
+## 实际生产过程中的权衡和考虑
+- 成本与收益
+    极低冲突概率 + 冲突后影响可接受 的情况下，往往可以根据成本考虑，不要求达到完全不可能重复
+- 真实性能需求
+- 考虑ID数量
+
+## 雪花算法及其衍生实现
 ### 雪花算法理论
 #### 雪花Id的组成
 #### workerId的分配
