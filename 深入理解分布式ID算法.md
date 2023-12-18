@@ -144,6 +144,7 @@ All indexes other than the clustered index are known as secondary indexes. In In
 提高性能的思路:
 - 不同步落盘
 - 预分配
+
 提高可用性的思路(多实例下高效分配, 容忍单点故障):
 - 依赖的协调组件能高可用部署
 - 对协调组件弱依赖(容忍一定程度的不可用): 预协调，持久化
