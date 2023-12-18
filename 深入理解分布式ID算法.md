@@ -4,6 +4,7 @@
 
 ## 背景和引入
 ### 雪花算法原理简述
+<img width="960" alt="image" src="https://github.com/geek-pie/Billions-Of-Traffic/assets/22070982/623cbfcb-1d75-4b28-af48-8144a51e230a">
 
 ## ID生成时需要考虑的内容
 ### ID长度带来的影响 [关键: 考虑缓冲区的索引场景空间有限]
