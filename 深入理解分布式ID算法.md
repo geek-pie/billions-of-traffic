@@ -316,8 +316,6 @@ https://pdai.tech/md/algorithm/alg-domain-id-snowflake.html
 > (2) 数据库的主键应该选择什么数据类型比较好？ - 知乎. https://www.zhihu.com/question/30888980.
 >
 > (3) MySQL：VARCHAR 可以作为主键吗？ - 极客教程. https://geek-docs.com/mysql/mysql-ask-answer/425_mysql_can_i_use_varchar_as_the_primary_key.html.
->
-> (4) MySQL: VARCHAR作为主键使用吗？|极客笔记. https://deepinout.com/mysql/mysql-questions/425_mysql_can_i_use_varchar_as_the_primary_key.html.
 
 - ID是否有序带来的影响
 > (1) 面试官：MySQL主键为什么不是连续递增的？-mysql设置主键自增长 - 51CTO. https://www.51cto.com/article/>743188.html.
