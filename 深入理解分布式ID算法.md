@@ -15,8 +15,8 @@
 Snowflake，雪花算法是由Twitter开源的分布式ID生成算法，以划分命名空间的方式将 64-bit位分割成多个部分，每个部分代表不同的含义。Snowflake 的Twitter官方原版是用Scala写的。
 简单描述：同一时刻 & 指定机器 & 某一并发序列，是唯一的。据此可生成一个64 bits的唯一ID（long）。
 
-## ID生成时需要考虑的内容
-### ID长度带来的影响*
+## ID生成时需要考虑的问题
+### ID长度带来的影响
 关键: 考虑缓冲区的索引场景空间有限
 
 在MySQL中，主键的长度会影响到查询性能。这是因为InnoDB存储引擎使用B+树数据结构来存储数据库表中的数据，表的主键存储在B+树的叶子节点上，叶子节点上还存储着主键所关联的行记录数据¹。
@@ -31,8 +31,8 @@ Snowflake，雪花算法是由Twitter开源的分布式ID生成算法，以划�
 > All indexes other than the clustered index are known as secondary indexes. In InnoDB, each record in a secondary index contains the primary key columns for the row, as well as the columns specified for the secondary index. InnoDB uses this primary key value to search for the row in the clustered index. ***If the primary key is long, the secondary indexes use more space, so it is advantageous to have a short primary key***.
 
 
-### ID数据类型带来的影响*
-在MySQL中，主键的选择需要根据具体的业务需求和系统性能要求来综合考虑。数值型主键和字符型主键各有其优点和适用的场景¹²。
+### ID数据类型带来的影响
+在MySQL中，主键的选择需要根据具体的业务需求和系统性能要求来综合考虑。数值型主键和字符型主键各有其优点和适用的场景。
 
 **数值型主键**（如INT、BIGINT）的优点包括¹：
 1. **空间效率高**：数值型占用的存储空间相对较小，比字符型更节省空间。
@@ -58,8 +58,8 @@ Snowflake，雪花算法是由Twitter开源的分布式ID生成算法，以划�
 - **可读性**：字符型主键更直观易懂，方便开发人员和用户理解；而数值型主键则需要额外的映射关系才能理解其含义。
 - **数据复用性**：字符型主键可以利用已有字符数据来标识数据，避免冗余存储；而数值型主键则需要额外的关联表来实现类似功能。
 
-### ID是否有序带来的影响*
-ID顺序递增类型和带来的影响* ：
+### ID是否有序带来的影响
+ID顺序递增类型和带来的影响：
 - 连续递增
 - 单调递增
 - 趋势递增 (描述一组数据整体上的增长趋势，而不是严格的每一项都比前一项大。在这种情况下，可能存在一些局部的下降，但是整体的趋势是向上的)
@@ -295,7 +295,8 @@ UUID(Universally Unique Identifier)的标准型式包含32个16进制数字，�
 > 
 > 分布式场景下需要用户自己考虑合适的workId方案去实现接口。
 
-## 参考 (以下参考都是写出提纲和之后让GPT生成内容时，GPT摘抄来源的参考。其中质量参差不齐尚未筛选)
+## 参考 
+以下一些参考都是写出提纲和之后让GPT生成内容时，GPT摘抄来源的参考。其中质量参差不齐，阅读时需要加以自行判断分析
 
 https://zhuanlan.zhihu.com/p/397680307
 
